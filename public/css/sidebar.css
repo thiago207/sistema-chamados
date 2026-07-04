@@ -1,0 +1,124 @@
+:root {
+    --azul-escuro: #1a3a6b;
+    --azul-profundo: #0d2244;
+    --vermelho: #c0392b;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background-color: #f4f6f9;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    background: linear-gradient(180deg, var(--azul-escuro) 0%, var(--azul-profundo) 100%);
+    color: #fff;
+    transition: width 0.3s ease;
+    overflow-x: hidden;
+    z-index: 1000;
+}
+
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.sidebar.collapsed .link-text,
+.sidebar.collapsed .sidebar-brand span,
+.sidebar.collapsed .bi-chevron-down {
+    display: none;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    font-weight: bold;
+    font-size: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    white-space: nowrap;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #cdd5e0;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.sidebar-menu a:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+}
+
+.sidebar-menu i {
+    font-size: 18px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: rgba(0,0,0,0.15);
+}
+
+.submenu a {
+    padding-left: 54px;
+    font-size: 14px;
+}
+
+.menu-toggle-chevron {
+    margin-left: auto;
+    transition: transform 0.2s;
+}
+
+a[aria-expanded="true"] .menu-toggle-chevron {
+    transform: rotate(180deg);
+}
+
+.main-content {
+    margin-left: 260px;
+    transition: margin-left 0.3s ease;
+}
+
+.main-content.expanded {
+    margin-left: 70px;
+}
+
+.topbar {
+    background: #fff;
+    padding: 15px 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-toggle {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: var(--azul-escuro);
+    cursor: pointer;
+}
+
+.content-area {
+    padding: 25px;
+}
