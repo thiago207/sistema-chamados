@@ -1,26 +1,42 @@
 @extends('layouts.app')
 
+@section('titulo', 'Cadastrar Usuário · Sale Marketing')
+
 @section('content')
+
+@include('partials.breadcrumb', ['items' => [
+    ['label' => 'Menu', 'url' => '/menu'],
+    ['label' => 'Cadastro', 'url' => '/usuarios/listar'],
+    ['label' => 'Novo usuário'],
+]])
+
+<div class="page-header">
+    <div>
+        <h1 class="page-header__title">Cadastrar Novo Usuário</h1>
+        <p class="page-header__subtitle mb-0">Adicione um novo usuário ao sistema</p>
+    </div>
+</div>
+
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-lg-7">
 
-        <div class="card shadow-sm border-0">
-            <div class="card-header text-white fw-bold" style="background-color: #1a3a6b;">
-                Cadastrar Novo Usuário
+        {{-- Mensagem de sucesso --}}
+        @if(session('sucesso'))
+            <div class="alert alert-success d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle"></i>
+                <span>{{ session('sucesso') }}</span>
             </div>
-            <div class="card-body p-4">
+        @endif
 
-                {{-- Mensagem de sucesso --}}
-                @if(session('sucesso'))
-                    <div class="alert alert-success">{{ session('sucesso') }}</div>
-                @endif
+        <div class="card">
+            <div class="card-body p-4">
 
                 <form action="/usuarios/cadastrar" method="POST">
                     @csrf
 
                     {{-- Nome --}}
                     <div class="mb-3">
-                        <label class="form-label fw-bold" style="color: #1a3a6b;">Nome</label>
+                        <label class="form-label">Nome</label>
                         <input
                             type="text"
                             name="name"
@@ -35,7 +51,7 @@
 
                     {{-- Email --}}
                     <div class="mb-3">
-                        <label class="form-label fw-bold" style="color: #1a3a6b;">Email</label>
+                        <label class="form-label">Email</label>
                         <input
                             type="email"
                             name="email"
@@ -50,7 +66,7 @@
 
                     {{-- Senha --}}
                     <div class="mb-3">
-                        <label class="form-label fw-bold" style="color: #1a3a6b;">Senha</label>
+                        <label class="form-label">Senha</label>
                         <input
                             type="password"
                             name="password"
@@ -63,8 +79,8 @@
                     </div>
 
                     {{-- Confirmar Senha --}}
-                    <div class="mb-3">
-                        <label class="form-label fw-bold" style="color: #1a3a6b;">Confirmar Senha</label>
+                    <div class="mb-4">
+                        <label class="form-label">Confirmar Senha</label>
                         <input
                             type="password"
                             name="password_confirmation"
@@ -73,8 +89,8 @@
                         >
                     </div>
 
-                    <button type="submit" class="btn w-100 text-white fw-bold" style="background-color: #c0392b;">
-                        Cadastrar
+                    <button type="submit" class="btn btn-brand w-100 fw-bold">
+                        <i class="bi bi-person-check"></i> Cadastrar
                     </button>
 
                 </form>

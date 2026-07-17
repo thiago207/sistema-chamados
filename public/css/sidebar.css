@@ -1,30 +1,34 @@
-:root {
-    --azul-escuro: #1a3a6b;
-    --azul-profundo: #0d2244;
-    --vermelho: #c0392b;
-}
+/* ==========================================================================
+   Sale Marketing — Shell da aplicação
+   Sidebar, topbar e área de conteúdo. Depende de theme.css (tokens).
+   Classes e IDs abaixo são consumidos por public/js/sidebar.js — mantidos.
+   ========================================================================== */
 
 body {
-    margin: 0;
-    font-family: system-ui, sans-serif;
-    background-color: #f4f6f9;
+    background-color: var(--color-bg);
 }
 
+/* ---------------------------------------------------------------------- */
+/* Sidebar                                                                 */
+/* ---------------------------------------------------------------------- */
 .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
     width: 260px;
-    background: linear-gradient(180deg, var(--azul-escuro) 0%, var(--azul-profundo) 100%);
+    background: linear-gradient(180deg, var(--color-primary-600) 0%, var(--color-primary-900) 100%);
     color: #fff;
-    transition: width 0.3s ease;
+    transition: width var(--transition-slow), transform var(--transition-slow);
     overflow-x: hidden;
-    z-index: 1000;
+    overflow-y: auto;
+    z-index: 1030;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar.collapsed {
-    width: 70px;
+    width: 74px;
 }
 
 .sidebar.collapsed .link-text,
@@ -36,89 +40,196 @@ body {
 .sidebar-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 20px;
-    font-weight: bold;
-    font-size: 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    gap: var(--space-3);
+    padding: var(--space-5) var(--space-5);
+    font-weight: 700;
+    font-size: var(--fs-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     white-space: nowrap;
+    color: #fff;
+}
+
+.sidebar-brand i {
+    font-size: 1.4rem;
+    color: var(--color-accent-400);
 }
 
 .sidebar-menu {
     list-style: none;
-    padding: 10px 0;
+    padding: var(--space-3) var(--space-2);
     margin: 0;
+    flex: 1;
+}
+
+.sidebar-menu li {
+    margin-bottom: 2px;
 }
 
 .sidebar-menu a {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
-    color: #cdd5e0;
+    gap: var(--space-3);
+    padding: 0.7rem var(--space-3);
+    border-radius: var(--radius-sm);
+    color: #c7d3e8;
     text-decoration: none;
     white-space: nowrap;
-    transition: background 0.2s;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .sidebar-menu a:hover {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.08);
     color: #fff;
 }
 
+.sidebar-menu a.active,
+.sidebar-menu a[aria-current="page"] {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    box-shadow: inset 3px 0 0 var(--color-accent-500);
+}
+
 .sidebar-menu i {
-    font-size: 18px;
+    font-size: 1.05rem;
     min-width: 20px;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .submenu {
     list-style: none;
-    padding: 0;
+    padding: 2px 0 6px;
     margin: 0;
-    background: rgba(0,0,0,0.15);
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-sm);
 }
 
 .submenu a {
-    padding-left: 54px;
-    font-size: 14px;
+    padding-left: 3.1rem;
+    font-size: var(--fs-xs);
 }
 
 .menu-toggle-chevron {
     margin-left: auto;
-    transition: transform 0.2s;
+    font-size: 0.8rem !important;
+    transition: transform var(--transition-base);
 }
 
 a[aria-expanded="true"] .menu-toggle-chevron {
     transform: rotate(180deg);
 }
 
+.sidebar-footer {
+    padding: var(--space-3);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Conteúdo principal                                                      */
+/* ---------------------------------------------------------------------- */
 .main-content {
     margin-left: 260px;
-    transition: margin-left 0.3s ease;
+    min-height: 100vh;
+    transition: margin-left var(--transition-slow);
 }
 
 .main-content.expanded {
-    margin-left: 70px;
+    margin-left: 74px;
 }
 
 .topbar {
-    background: #fff;
-    padding: 15px 25px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background: var(--color-surface);
+    padding: var(--space-3) var(--space-5);
+    border-bottom: 1px solid var(--color-border);
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: var(--space-4);
+    position: sticky;
+    top: 0;
+    z-index: 1020;
 }
 
 .btn-toggle {
     background: none;
     border: none;
-    font-size: 22px;
-    color: var(--azul-escuro);
+    font-size: 1.3rem;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    color: var(--color-primary-600);
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.btn-toggle:hover {
+    background-color: var(--color-primary-50);
+}
+
+.topbar-title {
+    font-weight: 700;
+    color: var(--color-ink-900);
+    font-size: var(--fs-base);
+}
+
+.topbar-user {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.topbar-user .fw-bold {
+    color: var(--color-primary-600) !important;
+    font-size: var(--fs-sm);
 }
 
 .content-area {
-    padding: 25px;
+    padding: var(--space-5);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Responsivo — sidebar em overlay abaixo de 992px                         */
+/* ---------------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .sidebar.collapsed {
+        width: 260px;
+        transform: translateX(0);
+    }
+
+    .sidebar.collapsed .link-text,
+    .sidebar.collapsed .sidebar-brand span,
+    .sidebar.collapsed .bi-chevron-down {
+        display: inline;
+    }
+
+    .main-content,
+    .main-content.expanded {
+        margin-left: 0;
+    }
+
+    .content-area {
+        padding: var(--space-4);
+    }
+
+    .topbar {
+        padding: var(--space-3) var(--space-4);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .topbar-user span:not(.avatar-circle) {
+        display: none;
+    }
 }
