@@ -25,6 +25,7 @@ Route::prefix('usuarios')->group(function () {
 Route::prefix('tarefas')->group(function () {
     Route::get('/', [TarefaController::class, 'listarTarefas']);
     Route::get('/criar', [TarefaController::class, 'index']);
+    Route::get('/eventos', [TarefaController::class, 'eventos']);
     Route::post('/salvar', [TarefaController::class, 'salvarTarefa']);
 
     Route::put('/{id}/iniciar', [TarefaController::class, 'iniciar']);

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use App\Models\User;
 use App\Models\Tarefa;
+use Illuminate\Support\Carbon;
 
 class TarefaController extends Controller
 {
@@ -73,6 +74,43 @@ class TarefaController extends Controller
             'usuarios' => $usuarios,
         ]);
     }
+    public function eventos(Request $request)
+    {
+        $query = Tarefa::with('responsaveis')->whereNotNull('prazo');
+
+        if ($request->filled('start') && $request->filled('end')) {
+            $query->whereBetween('prazo', [
+                Carbon::parse($request->query('start'))->toDateString(),
+                Carbon::parse($request->query('end'))->toDateString(),
+            ]);
+        }
+
+        $cores = [
+            'pendente'     => '#f0ad4e',
+            'em_andamento' => '#0d6efd',
+            'pausada'      => '#6c757d',
+            'concluida'    => '#198754',
+            'cancelada'    => '#dc3545',
+        ];
+
+        $eventos = $query->get()->map(function ($tarefa) use ($cores) {
+            return [
+                'id'     => $tarefa->id,
+                'title'  => $tarefa->titulo,
+                'start'  => $tarefa->prazo->toDateString(),
+                'allDay' => true,
+                'color'  => $cores[$tarefa->status] ?? '#0d6efd',
+                'extendedProps' => [
+                    'status'       => $tarefa->status,
+                    'descricao'    => $tarefa->descricao,
+                    'responsaveis' => $tarefa->responsaveis->pluck('name')->implode(', '),
+                ],
+            ];
+        });
+
+        return response()->json($eventos);
+    }
+
     public function iniciar($id)
     {
         $tarefa = Tarefa::findOrFail($id);
