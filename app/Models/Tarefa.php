@@ -12,13 +12,12 @@ class Tarefa extends Model
     'descricao',
     'criador_id',
     'status',
-    'prazo',
+    'data',
     'observacoes',
-    'resolucao',
     'concluida_em',
 ];
     protected $casts = [
-    'prazo'        => 'date',
+    'data'         => 'date',
     'concluida_em' => 'datetime',
 ];
     public function responsaveis()

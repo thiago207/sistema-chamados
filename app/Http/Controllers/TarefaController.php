@@ -21,8 +21,7 @@ class TarefaController extends Controller
         $request->validate([
             'titulo'         => 'required|max:255',
             'descricao'      => 'required',
-            'status'         => 'required|in:pendente,em_andamento,concluida,cancelada,pausada',
-            'prazo'          => 'nullable|date',
+            'data'           => 'required|date',
             'observacoes'    => 'nullable',
             'responsaveis'   => 'required|array|min:1',
             'responsaveis.*' => 'exists:users,id',
@@ -32,14 +31,20 @@ class TarefaController extends Controller
             'titulo'      => $request->input('titulo'),
             'descricao'   => $request->input('descricao'),
             'criador_id'  => session('usuario_id'),
-            'status'      => $request->input('status'),
-            'prazo'       => $request->input('prazo'),
+            'status'      => 'pendente',
+            'data'        => $request->input('data'),
             'observacoes' => $request->input('observacoes'),
         ]);
 
         $tarefa->responsaveis()->attach($request->input('responsaveis'));
 
         return redirect('/tarefas/criar')->with('sucesso', 'Tarefa criada com sucesso!');
+    }
+    public function show($id)
+    {
+        $tarefa = Tarefa::with('responsaveis', 'criador')->findOrFail($id);
+
+        return view('tarefas.show', ['tarefa' => $tarefa]);
     }
     public function listarTarefas(Request $request)
     {
@@ -76,28 +81,26 @@ class TarefaController extends Controller
     }
     public function eventos(Request $request)
     {
-        $query = Tarefa::with('responsaveis')->whereNotNull('prazo');
+        $query = Tarefa::with('responsaveis')->whereNotNull('data');
 
         if ($request->filled('start') && $request->filled('end')) {
-            $query->whereBetween('prazo', [
+            $query->whereBetween('data', [
                 Carbon::parse($request->query('start'))->toDateString(),
                 Carbon::parse($request->query('end'))->toDateString(),
             ]);
         }
 
         $cores = [
-            'pendente'     => '#f0ad4e',
-            'em_andamento' => '#0d6efd',
-            'pausada'      => '#6c757d',
-            'concluida'    => '#198754',
-            'cancelada'    => '#dc3545',
+            'pendente'  => '#f0ad4e',
+            'concluida' => '#198754',
+            'cancelada' => '#dc3545',
         ];
 
         $eventos = $query->get()->map(function ($tarefa) use ($cores) {
             return [
                 'id'     => $tarefa->id,
                 'title'  => $tarefa->titulo,
-                'start'  => $tarefa->prazo->toDateString(),
+                'start'  => $tarefa->data->toDateString(),
                 'allDay' => true,
                 'color'  => $cores[$tarefa->status] ?? '#0d6efd',
                 'extendedProps' => [
@@ -111,40 +114,20 @@ class TarefaController extends Controller
         return response()->json($eventos);
     }
 
-    public function iniciar($id)
+    public function concluir($id)
     {
-        $tarefa = Tarefa::findOrFail($id);
-        $tarefa->update(['status' => 'em_andamento']);
-
-        return redirect('/tarefas')->with('sucesso', 'Tarefa iniciada!');
-    }
-
-    public function concluir(Request $request, $id)
-    {
-        $request->validate([
-            'resolucao' => 'required|min:10',
-        ]);
-
-        $tarefa = Tarefa::findOrFail($id);
-        $tarefa->update([
+        Tarefa::findOrFail($id)->update([
             'status'       => 'concluida',
-            'resolucao'    => $request->input('resolucao'),
             'concluida_em' => now(),
         ]);
 
-        return redirect('/tarefas')->with('sucesso', 'Tarefa concluída!');
-    }
-
-    public function pausar($id)
-    {
-        Tarefa::findOrFail($id)->update(['status' => 'pausada']);
-        return redirect('/tarefas')->with('sucesso', 'Tarefa pausada.');
+        return redirect()->back()->with('sucesso', 'Tarefa concluída!');
     }
 
     public function cancelar($id)
     {
         Tarefa::findOrFail($id)->update(['status' => 'cancelada']);
-        return redirect('/tarefas')->with('sucesso', 'Tarefa cancelada.');
+        return redirect()->back()->with('sucesso', 'Tarefa cancelada.');
     }
-    
+
 }

@@ -23,7 +23,6 @@ return new class extends Migration
                 'em_andamento',
                 'concluida',
                 'cancelada',
-                'pausada'
             ])->default('pendente');
 
             $table->date('prazo')->nullable();

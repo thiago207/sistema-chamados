@@ -3,6 +3,7 @@
 @section('titulo', 'Menu · Sale Marketing')
 
 @section('content')
+
 <div class="page-header">
     <div>
         <h1 class="page-header__title">Bem-vindo, {{ session('usuario_nome') }}</h1>
@@ -18,40 +19,78 @@
     </div>
 </div>
 
+{{-- Cards de resumo: só aparecem se o controller passar $resumo.
+     Se não passar, o bloco é ignorado e nada quebra. --}}
+@isset($resumo)
+<div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3">
+        <div class="card stat-card h-100" style="border-left-color:#f59e0b">
+            <div class="card-body">
+                <div class="stat-card__num text-warning">{{ $resumo['pendentes'] ?? 0 }}</div>
+                <div class="stat-card__label text-muted">Pendentes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stat-card h-100" style="border-left-color:#22c55e">
+            <div class="card-body">
+                <div class="stat-card__num text-success">{{ $resumo['concluidas'] ?? 0 }}</div>
+                <div class="stat-card__label text-muted">Concluídas</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stat-card h-100" style="border-left-color:#6b7280">
+            <div class="card-body">
+                <div class="stat-card__num text-secondary">{{ $resumo['canceladas'] ?? 0 }}</div>
+                <div class="stat-card__label text-muted">Canceladas</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stat-card h-100" style="border-left-color:#ef4444">
+            <div class="card-body">
+                <div class="stat-card__num text-danger">{{ $resumo['atrasadas'] ?? 0 }}</div>
+                <div class="stat-card__label text-muted">Atrasadas</div>
+            </div>
+        </div>
+    </div>
+</div>
+@endisset
+
 <div class="card">
     <div class="card-body">
-        <div id="calendario"></div>
+        {{-- Legenda: explica o que cada cor significa --}}
+        <div class="cal-legend mb-3 text-muted">
+            <span><span class="dot" style="background:#f59e0b"></span>Pendente</span>
+            <span><span class="dot" style="background:#22c55e"></span>Concluída</span>
+            <span><span class="dot" style="background:#ef4444"></span>Cancelada</span>
+        </div>
+
+        <div id="calendarioWrap">
+            <div id="calendarioLoading" aria-hidden="true">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando…</span>
+                </div>
+            </div>
+            <div id="calendario"></div>
+        </div>
     </div>
 </div>
 
-{{-- Modal de detalhes do evento --}}
-<div class="modal fade" id="modalEvento" tabindex="-1">
+{{-- Modal com as tarefas do dia clicado --}}
+<div class="modal fade" id="modalDia" tabindex="-1" aria-labelledby="modalDiaTitulo" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-brand text-white">
-                <h5 class="modal-title" id="modalEventoTitulo">Tarefa</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="modalDiaTitulo">Tarefas do dia</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <small class="text-muted d-block">Status</small>
-                    <span id="modalEventoStatus"></span>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Prazo</small>
-                    <span id="modalEventoPrazo" class="fw-bold"></span>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Responsáveis</small>
-                    <span id="modalEventoResponsaveis"></span>
-                </div>
-                <div class="mb-0">
-                    <small class="text-muted d-block">Descrição</small>
-                    <p id="modalEventoDescricao" class="mb-0"></p>
-                </div>
+                <div class="list-group lista-tarefas-dia" id="modalDiaLista"></div>
             </div>
             <div class="modal-footer">
-                <a href="/tarefas" class="btn btn-outline-secondary">Ver na lista</a>
+                <a href="/tarefas" class="btn btn-outline-secondary">Ver todas as tarefas</a>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>
@@ -59,56 +98,9 @@
 </div>
 
 @section('scripts')
+    <link href="{{ asset('css/menu.css') }}" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6/locales-all.global.min.js"></script>
-    <script>
-        $(function () {
-            const badges = {
-                pendente:     ['Pendente', 'bg-warning text-dark'],
-                em_andamento: ['Em andamento', 'bg-primary'],
-                pausada:      ['Pausada', 'bg-secondary'],
-                concluida:    ['Concluída', 'bg-success'],
-                cancelada:    ['Cancelada', 'bg-danger'],
-            };
-
-            const calendarEl = document.getElementById('calendario');
-            const calendar = new FullCalendar.Calendar(calendarEl, {
-                locale: 'pt-br',
-                initialView: 'dayGridMonth',
-                height: 'auto',
-                dayMaxEvents: true,
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,listMonth',
-                },
-                events: function (info, successCallback, failureCallback) {
-                    $.ajax({
-                        url: '/tarefas/eventos',
-                        data: { start: info.startStr, end: info.endStr },
-                        dataType: 'json',
-                    })
-                        .done(successCallback)
-                        .fail(failureCallback);
-                },
-                eventClick: function (info) {
-                    const props = info.event.extendedProps;
-                    const [rotulo, classe] = badges[props.status] || ['—', 'bg-secondary'];
-
-                    $('#modalEventoTitulo').text(info.event.title);
-                    $('#modalEventoStatus').html(`<span class="badge ${classe}">${rotulo}</span>`);
-                    $('#modalEventoPrazo').text(info.event.start
-                        ? info.event.start.toLocaleDateString('pt-BR')
-                        : 'Sem prazo');
-                    $('#modalEventoResponsaveis').text(props.responsaveis || 'Ninguém atribuído');
-                    $('#modalEventoDescricao').text(props.descricao || '');
-
-                    new bootstrap.Modal(document.getElementById('modalEvento')).show();
-                },
-            });
-
-            calendar.render();
-        });
-    </script>
+    <script src="{{ asset('js/menu.js') }}"></script>
 @endsection
 @endsection

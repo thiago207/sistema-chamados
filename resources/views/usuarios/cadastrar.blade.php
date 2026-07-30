@@ -6,7 +6,7 @@
 
 @include('partials.breadcrumb', ['items' => [
     ['label' => 'Menu', 'url' => '/menu'],
-    ['label' => 'Cadastro', 'url' => '/usuarios/listar'],
+    ['label' => 'Usuários', 'url' => '/usuarios/listar'],
     ['label' => 'Novo usuário'],
 ]])
 

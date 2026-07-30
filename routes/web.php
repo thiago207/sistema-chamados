@@ -28,9 +28,8 @@ Route::prefix('tarefas')->group(function () {
     Route::get('/eventos', [TarefaController::class, 'eventos']);
     Route::post('/salvar', [TarefaController::class, 'salvarTarefa']);
 
-    Route::put('/{id}/iniciar', [TarefaController::class, 'iniciar']);
+    Route::get('/{id}', [TarefaController::class, 'show']);
     Route::put('/{id}/concluir', [TarefaController::class, 'concluir']);
-    Route::put('/{id}/pausar', [TarefaController::class, 'pausar']);
     Route::put('/{id}/cancelar', [TarefaController::class, 'cancelar']);
 });
     

@@ -28,7 +28,7 @@
         @endif
 
         <div class="card">
-            <div class="card-body p-4">
+            <div class="card-body">
 
                 <form action="/tarefas/salvar" method="POST">
                     @csrf
@@ -74,29 +74,16 @@
                         @endif
                     </div>
 
-                    <div class="row">
-                        {{-- Status --}}
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="pendente"     {{ old('status') == 'pendente' ? 'selected' : '' }}>Pendente</option>
-                                <option value="em_andamento" {{ old('status') == 'em_andamento' ? 'selected' : '' }}>Em andamento</option>
-                                <option value="pausada"      {{ old('status') == 'pausada' ? 'selected' : '' }}>Pausada</option>
-                                <option value="concluida"    {{ old('status') == 'concluida' ? 'selected' : '' }}>Concluída</option>
-                                <option value="cancelada"    {{ old('status') == 'cancelada' ? 'selected' : '' }}>Cancelada</option>
-                            </select>
-                        </div>
-
-                        {{-- Prazo --}}
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Prazo</label>
-                            <input type="date" name="prazo"
-                                   class="form-control {{ $errors->has('prazo') ? 'is-invalid' : '' }}"
-                                   value="{{ old('prazo') }}">
-                            @if($errors->has('prazo'))
-                                <div class="invalid-feedback">{{ $errors->first('prazo') }}</div>
-                            @endif
-                        </div>
+                    {{-- Data a ser feita --}}
+                    <div class="mb-3">
+                        <label class="form-label">Data a ser feita</label>
+                        <input type="date" name="data"
+                               class="form-control {{ $errors->has('data') ? 'is-invalid' : '' }}"
+                               value="{{ old('data') }}">
+                        <small class="text-muted">O dia em que essa tarefa deve ser executada. Aparece no calendário do menu.</small>
+                        @if($errors->has('data'))
+                            <div class="invalid-feedback d-block">{{ $errors->first('data') }}</div>
+                        @endif
                     </div>
 
                     {{-- Observações --}}

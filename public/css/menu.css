@@ -1,0 +1,63 @@
+/* ==========================================================================
+   Sale Marketing — Menu (calendário de tarefas)
+   Estilos específicos da tela de menu: cores dos eventos do FullCalendar,
+   cards de resumo, legenda, overlay de carregamento e a lista de tarefas
+   do dia (modal). Depende de theme.css (tokens).
+   ========================================================================== */
+
+/* --- Cores dos eventos por status ---
+   O FullCalendar 6 lê estas variáveis CSS pra pintar cada evento.
+   A classe é carimbada no JS pelo callback eventClassNames. */
+.fc-status-pendente  { --fc-event-bg-color:#f59e0b; --fc-event-border-color:#f59e0b; --fc-event-text-color:#1f2937; }
+.fc-status-concluida { --fc-event-bg-color:#22c55e; --fc-event-border-color:#22c55e; }
+.fc-status-cancelada { --fc-event-bg-color:#ef4444; --fc-event-border-color:#ef4444; }
+
+/* Concluída/cancelada com o título riscado, reforçando o estado */
+.fc-status-concluida .fc-event-title { text-decoration: line-through; opacity:.85; }
+.fc-status-cancelada .fc-event-title { text-decoration: line-through; opacity:.65; }
+
+.fc .fc-daygrid-event, .fc .fc-daygrid-day-number, .fc .fc-daygrid-day-frame { cursor: pointer; }
+
+/* --- Cards de resumo --- */
+.stat-card { border-left: 4px solid transparent; transition: transform .12s ease; }
+.stat-card:hover { transform: translateY(-2px); }
+.stat-card__num   { font-size: 1.75rem; font-weight: 700; line-height: 1; }
+.stat-card__label { font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+
+/* --- Legenda de cores --- */
+.cal-legend { display:flex; flex-wrap:wrap; gap:.75rem 1rem; font-size:.8rem; }
+.cal-legend .dot { width:.7rem; height:.7rem; border-radius:2px; display:inline-block; margin-right:.35rem; vertical-align:middle; }
+
+/* --- Overlay de carregamento do calendário --- */
+#calendarioWrap { position: relative; min-height: 200px; }
+#calendarioLoading {
+    position: absolute; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.6); z-index: 5; border-radius: .5rem;
+}
+#calendarioLoading.is-active { display: flex; }
+
+/* --- Lista de tarefas do dia (modal) --- */
+.lista-tarefas-dia .list-group-item { display: flex; align-items: center; gap: .75rem; }
+.lista-tarefas-dia .list-group-item .titulo { flex: 1; font-weight: 600; }
+.lista-tarefas-dia .list-group-item.concluida .titulo,
+.lista-tarefas-dia .list-group-item.cancelada .titulo { text-decoration: line-through; opacity: .7; }
+
+/* --- Responsivo: celular --- */
+@media (max-width: 575.98px) {
+    .fc .fc-toolbar { flex-direction: column; align-items: stretch; gap: .5rem; }
+    .fc .fc-toolbar-title { font-size: 1.05rem; text-align: center; }
+    .fc .fc-toolbar-chunk { display: flex; justify-content: center; }
+    .fc .fc-col-header-cell-cushion { font-size: .68rem; }
+    .fc .fc-daygrid-day-number { font-size: .75rem; padding: 2px 3px; }
+    .fc .fc-daygrid-day-events { min-height: 1.2em; }
+    .fc-event-title { font-size: .65rem; }
+    .fc-daygrid-event { padding: 0 2px; }
+    .fc-daygrid-more-link { font-size: .62rem; }
+
+    /* Cards de resumo mais compactos — não precisam ocupar tanta tela */
+    .stat-card .card-body { padding: .6rem .75rem; }
+    .stat-card__num { font-size: 1.25rem; }
+    .stat-card__label { font-size: .65rem; }
+    .row.g-3.mb-3 { --bs-gutter-y: .5rem; --bs-gutter-x: .5rem; }
+}
