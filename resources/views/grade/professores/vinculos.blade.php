@@ -17,13 +17,6 @@
     </div>
 </div>
 
-@if(session('sucesso'))
-    <div class="alert alert-success d-flex align-items-center gap-2">
-        <i class="bi bi-check-circle"></i>
-        <span>{{ session('sucesso') }}</span>
-    </div>
-@endif
-
 @if($errors->has('materia_id'))
     <div class="alert alert-danger d-flex align-items-center gap-2">
         <i class="bi bi-exclamation-circle"></i>

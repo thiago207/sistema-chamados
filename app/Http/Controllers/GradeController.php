@@ -14,11 +14,49 @@ use Illuminate\Http\Request;
 
 class GradeController extends Controller
 {
-    public function index()
+    public function index(ValidadorDeViabilidadeService $validador, MontadorDeGradeService $montador)
     {
         $escola = Escola::find(session('escola_ativa_id'));
 
-        return view('grade.index', ['escola' => $escola]);
+        $todosProblemas = [
+            ...$validador->validar(),
+            ...$validador->verificarCobertura(),
+        ];
+
+        [$inconsistenciasPorTurma, $inconsistenciasPorProfessor] = $this->agruparProblemas($todosProblemas);
+
+        $resumo = null;
+
+        if (empty($todosProblemas)) {
+            $totalTurmas = Turma::count();
+            $totalProfessores = Professor::where('ativo', true)->count();
+            $totalAulasGeradas = Horario::count();
+            $totalAulasEsperadas = Turma::with('materias')->get()
+                ->sum(fn (Turma $turma) => $turma->materias->sum(fn ($materia) => $materia->pivot->quantidade_aulas));
+
+            $resumo = [
+                'totalTurmas' => $totalTurmas,
+                'totalProfessores' => $totalProfessores,
+                'totalAulasGeradas' => $totalAulasGeradas,
+                'totalAulasEsperadas' => $totalAulasEsperadas,
+            ];
+        }
+
+        $turmas = Turma::with('materias')->orderBy('nome')->get();
+
+        $grades = $turmas->mapWithKeys(fn (Turma $turma) => [
+            $turma->id => $montador->matrizDaTurma($turma),
+        ]);
+
+        return view('grade.index', [
+            'escola' => $escola,
+            'totalInconsistencias' => count($todosProblemas),
+            'inconsistenciasPorTurma' => $inconsistenciasPorTurma,
+            'inconsistenciasPorProfessor' => $inconsistenciasPorProfessor,
+            'resumo' => $resumo,
+            'turmas' => $turmas,
+            'grades' => $grades,
+        ]);
     }
 
     public function gerar(ValidadorDeViabilidadeService $validador)
@@ -26,7 +64,34 @@ class GradeController extends Controller
         $problemas = $validador->validar();
         $cobertura = $validador->verificarCobertura();
 
-        return view('grade.gerar', ['problemas' => $problemas, 'cobertura' => $cobertura]);
+        [$problemasPorTurma, $problemasPorProfessor] = $this->agruparProblemas($problemas);
+        [$coberturaPorTurma, $coberturaPorProfessor] = $this->agruparProblemas($cobertura);
+
+        return view('grade.gerar', [
+            'totalProblemas' => count($problemas),
+            'problemasPorTurma' => $problemasPorTurma,
+            'problemasPorProfessor' => $problemasPorProfessor,
+            'totalCobertura' => count($cobertura),
+            'coberturaPorTurma' => $coberturaPorTurma,
+            'coberturaPorProfessor' => $coberturaPorProfessor,
+        ]);
+    }
+
+    /**
+     * Agrupa uma lista de problemas do Validador em duas coleções — por
+     * turma e por professor — pra exibir como accordion nas telas.
+     */
+    private function agruparProblemas(array $problemas): array
+    {
+        $porTurma = collect($problemas)
+            ->filter(fn ($p) => $p['turma_id'] !== null)
+            ->groupBy('turma_id');
+
+        $porProfessor = collect($problemas)
+            ->filter(fn ($p) => $p['professor_id'] !== null)
+            ->groupBy('professor_id');
+
+        return [$porTurma, $porProfessor];
     }
 
     public function processar(ValidadorDeViabilidadeService $validador, GeradorDeGradeService $gerador)
@@ -41,12 +106,14 @@ class GradeController extends Controller
 
         $mensagem = "Grade gerada: {$resultado['alocadas']} de {$resultado['total']} aula(s) alocada(s).";
 
-        return redirect('/grade/horarios')
-            ->with('sucesso', $mensagem)
-            ->with('naoAlocadas', $resultado['naoAlocadas']);
+        if (! empty($resultado['naoAlocadas'])) {
+            $mensagem .= ' Veja abaixo o que ficou pendente.';
+        }
+
+        return redirect('/grade/horarios')->with('sucesso', $mensagem);
     }
 
-    public function horarios(Request $request)
+    public function horarios(Request $request, ValidadorDeViabilidadeService $validador)
     {
         $turmas = Turma::orderBy('nome')->get();
         $turmaId = $request->input('turma_id', optional($turmas->first())->id);
@@ -54,6 +121,7 @@ class GradeController extends Controller
 
         $grade = [];
         $opcoesPorSlot = [];
+        $problemasDaTurma = collect();
 
         if ($turma) {
             $horarios = Horario::with(['materia', 'professor'])->where('turma_id', $turma->id)->get();
@@ -110,6 +178,8 @@ class GradeController extends Controller
                     }
                 }
             }
+
+            $problemasDaTurma = collect($validador->problemasDaTurma($turma->id));
         }
 
         return view('grade.horarios', [
@@ -117,26 +187,14 @@ class GradeController extends Controller
             'turma' => $turma,
             'grade' => $grade,
             'opcoesPorSlot' => $opcoesPorSlot,
+            'problemasDaTurma' => $problemasDaTurma,
         ]);
     }
 
-    public function horariosGeral(ValidadorDeViabilidadeService $validador, MontadorDeGradeService $montador)
+    public function horariosGeral()
     {
-        $turmas = Turma::with('materias')->orderBy('nome')->get();
-
-        $problemasPorTurma = collect($validador->verificarCobertura())
-            ->filter(fn ($problema) => isset($problema['turma_id']))
-            ->groupBy('turma_id');
-
-        $grades = $turmas->mapWithKeys(fn (Turma $turma) => [
-            $turma->id => $montador->matrizDaTurma($turma),
-        ]);
-
-        return view('grade.horarios-geral', [
-            'turmas' => $turmas,
-            'grades' => $grades,
-            'problemasPorTurma' => $problemasPorTurma,
-        ]);
+        // A Visão Geral virou a própria tela inicial do módulo.
+        return redirect('/grade');
     }
 
     public function atualizarCelula(Request $request)
@@ -164,14 +222,21 @@ class GradeController extends Controller
                 return back()->withErrors(['materia_id' => 'Essa matéria não tem professor vinculado nessa turma.']);
             }
 
-            $conflito = Horario::where('professor_id', $vinculo->professor_id)
+            $conflito = Horario::with('turma')
+                ->where('professor_id', $vinculo->professor_id)
                 ->where('dia_semana', $dados['dia_semana'])
                 ->where('turno', $dados['turno'])
                 ->where('numero_aula', $dados['numero_aula'])
-                ->exists();
+                ->first();
 
             if ($conflito) {
-                return back()->withErrors(['materia_id' => 'O professor dessa matéria já está em outra turma nesse horário.']);
+                $diasNomes = [1 => 'segunda', 2 => 'terça', 3 => 'quarta', 4 => 'quinta', 5 => 'sexta', 6 => 'sábado'];
+                $dia = $diasNomes[$dados['dia_semana']] ?? $dados['dia_semana'];
+                $turnoLabel = $dados['turno'] === 'manha' ? 'manhã' : 'tarde';
+
+                return back()->withErrors([
+                    'materia_id' => "O professor {$vinculo->professor->nome} já está alocado na turma {$conflito->turma->nome} nesse mesmo horário ({$dia}, {$turnoLabel}, {$dados['numero_aula']}ª aula) — não pode estar em dois lugares ao mesmo tempo.",
+                ]);
             }
 
             Horario::create([
@@ -182,6 +247,7 @@ class GradeController extends Controller
                 'dia_semana' => $dados['dia_semana'],
                 'turno' => $dados['turno'],
                 'numero_aula' => $dados['numero_aula'],
+                'editado_manualmente' => true,
             ]);
         }
 

@@ -20,6 +20,8 @@
 </head>
 <body>
 
+    @include('partials.flash-toasts')
+
     @include('layouts.partials.sidebar')
 
     <!-- CONTEÚDO -->
@@ -38,6 +40,7 @@
     <script src="{{ asset('js/sidebar.js') }}"></script>
     <script src="{{ asset('js/ui.js') }}"></script>
     <script src="{{ asset('js/confirmar.js') }}"></script>
+    <script src="{{ asset('js/toasts.js') }}"></script>
 
     @yield('scripts')
 

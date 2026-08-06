@@ -67,6 +67,40 @@
 }
 
 /* ---------------------------------------------------------------------- */
+/* Subnav — navegação horizontal entre seções do módulo Grade              */
+/* ---------------------------------------------------------------------- */
+.grade-subnav {
+    gap: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-3);
+    flex-wrap: wrap;
+}
+
+.grade-subnav .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.5rem var(--space-4);
+    border-radius: var(--radius-pill, 999px);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--color-ink-500);
+    background-color: transparent;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    white-space: nowrap;
+}
+
+.grade-subnav .nav-link:hover {
+    background-color: var(--color-primary-50);
+    color: var(--color-primary-600);
+}
+
+.grade-subnav .nav-link.active {
+    background-color: var(--color-primary-600);
+    color: #fff;
+}
+
+/* ---------------------------------------------------------------------- */
 /* Cards                                                                   */
 /* ---------------------------------------------------------------------- */
 .card {
@@ -254,6 +288,45 @@
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+/* Floating labels — realinhar ao padding customizado acima */
+.form-floating > .form-control,
+.form-floating > .form-select {
+    height: calc(3.2rem + 2px);
+    padding: 1rem 0.85rem 0.35rem;
+}
+
+.form-floating > label {
+    padding: 0.85rem 0.85rem;
+    color: var(--color-ink-500);
+    font-weight: 500;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select ~ label {
+    color: var(--color-ink-500);
+    opacity: 1;
+    transform: scale(0.78) translateY(-0.35rem) translateX(0.15rem);
+}
+
+/* Switch (Bootstrap .form-check.form-switch) na cor da marca */
+.form-switch .form-check-input {
+    width: 2.5em;
+    cursor: pointer;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: var(--color-primary-600);
+    border-color: var(--color-primary-600);
+}
+
+/* Input group — alinhar o "acessório" (ícone/texto) ao campo */
+.input-group-text {
+    border-color: var(--color-ink-300);
+    background-color: var(--color-ink-100);
+    color: var(--color-ink-500);
+}
+
 .form-control::placeholder {
     color: var(--color-ink-400);
 }
@@ -418,6 +491,103 @@
 .modal-footer {
     border-top: 1px solid var(--color-border);
     padding: var(--space-4) var(--space-5);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Toasts (mensagens flash de sucesso/erro)                                */
+/* ---------------------------------------------------------------------- */
+.toast-container {
+    z-index: 1080;
+}
+
+.toast {
+    border: none;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    min-width: 300px;
+}
+
+.toast .toast-body {
+    padding: var(--space-4);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+}
+
+.toast.text-bg-success .toast-body {
+    background-color: #eafaf1;
+    color: #1e7e4f;
+}
+
+.toast.text-bg-danger .toast-body {
+    background-color: var(--color-accent-50);
+    color: var(--color-accent-700);
+}
+
+.toast .toast-body i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Dropdowns                                                               */
+/* ---------------------------------------------------------------------- */
+.dropdown-menu {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-2);
+    font-size: var(--fs-sm);
+}
+
+.dropdown-item {
+    border-radius: var(--radius-sm);
+    padding: 0.55rem var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 500;
+    color: var(--color-ink-700);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--color-primary-50);
+    color: var(--color-primary-700);
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: var(--color-accent-50);
+    color: var(--color-accent-700) !important;
+}
+
+.dropdown-divider {
+    border-color: var(--color-border);
+    margin: var(--space-2) 0;
+}
+
+.dropdown-toggle-user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    border: none;
+    background: transparent;
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+    border-radius: var(--radius-full);
+    transition: background-color var(--transition-fast);
+}
+
+.dropdown-toggle-user:hover,
+.dropdown-toggle-user[aria-expanded="true"] {
+    background-color: var(--color-ink-100);
+}
+
+.dropdown-toggle-user::after {
+    display: none;
 }
 
 /* ---------------------------------------------------------------------- */

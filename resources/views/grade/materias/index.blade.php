@@ -9,6 +9,8 @@
     ['label' => 'Matérias'],
 ]])
 
+@include('grade.partials.subnav')
+
 <div class="page-header">
     <div>
         <h1 class="page-header__title">Matérias</h1>
@@ -19,20 +21,16 @@
     </button>
 </div>
 
-@if(session('sucesso'))
-    <div class="alert alert-success d-flex align-items-center gap-2">
-        <i class="bi bi-check-circle"></i>
-        <span>{{ session('sucesso') }}</span>
-    </div>
-@endif
-
-<div class="card mb-3">
+<div class="card mb-4">
     <div class="card-body">
         <form action="/grade/materias" method="GET" class="d-flex gap-2">
-            <input type="text" name="busca" class="form-control" placeholder="Buscar por nome..." value="{{ $busca }}">
-            <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" name="busca" class="form-control" placeholder="Buscar por nome..." value="{{ $busca }}">
+            </div>
+            <button type="submit" class="btn btn-outline-secondary text-nowrap">Buscar</button>
             @if($busca)
-                <a href="/grade/materias" class="btn btn-outline-secondary">Limpar</a>
+                <a href="/grade/materias" class="btn btn-ghost text-nowrap">Limpar</a>
             @endif
         </form>
     </div>
@@ -66,8 +64,7 @@
                 <table class="table table-hover mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th class="ps-4">#</th>
-                            <th>Nome</th>
+                            <th class="ps-4">Nome</th>
                             <th>Tipo</th>
                             <th class="text-end pe-4">Ações</th>
                         </tr>
@@ -75,20 +72,19 @@
                     <tbody>
                         @foreach($materias as $materia)
                             <tr>
-                                <td class="ps-4 text-muted">{{ $materia->id }}</td>
-                                <td class="fw-semibold text-brand">{{ $materia->nome }}</td>
+                                <td class="ps-4 fw-semibold text-brand">{{ $materia->nome }}</td>
                                 <td><span class="badge {{ $corTipo($materia->tipo) }}">{{ $rotuloTipo($materia->tipo) }}</span></td>
                                 <td class="pe-4">
                                     <div class="d-flex gap-2 justify-content-end">
-                                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $materia->id }}">
-                                            <i class="bi bi-pencil"></i> Editar
+                                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalEditar{{ $materia->id }}" title="Editar">
+                                            <i class="bi bi-pencil"></i>
                                         </button>
                                         <form action="/grade/materias/{{ $materia->id }}" method="POST"
                                             data-confirm="Excluir esta matéria?" data-confirm-tipo="danger">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="bi bi-trash"></i> Excluir
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -114,16 +110,16 @@
                         <form action="/grade/materias/{{ $materia->id }}" method="POST">
                             @csrf
                             @method('PUT')
-                            <div class="mb-3">
-                                <label class="form-label">Nome</label>
-                                <input type="text" name="nome" class="form-control" value="{{ $materia->nome }}" required>
+                            <div class="form-floating mb-3">
+                                <input type="text" id="nome{{ $materia->id }}" name="nome" class="form-control" value="{{ $materia->nome }}" placeholder="Nome" required>
+                                <label for="nome{{ $materia->id }}">Nome</label>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Tipo</label>
-                                <select name="tipo" class="form-select">
+                            <div class="form-floating mb-3">
+                                <select id="tipo{{ $materia->id }}" name="tipo" class="form-select">
                                     <option value="comum_curricular" {{ $materia->tipo === 'comum_curricular' ? 'selected' : '' }}>Comum Curricular</option>
                                     <option value="eletiva" {{ $materia->tipo === 'eletiva' ? 'selected' : '' }}>Eletiva</option>
                                 </select>
+                                <label for="tipo{{ $materia->id }}">Tipo</label>
                             </div>
                             <div class="modal-footer px-0 pb-0">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -148,19 +144,19 @@
             <div class="modal-body">
                 <form action="/grade/materias" method="POST">
                     @csrf
-                    <div class="mb-3">
-                        <label class="form-label">Nome</label>
-                        <input type="text" name="nome" class="form-control {{ $errors->has('nome') ? 'is-invalid' : '' }}" placeholder="Ex: Matemática" value="{{ old('nome') }}" required>
+                    <div class="form-floating mb-3">
+                        <input type="text" id="novaNome" name="nome" class="form-control {{ $errors->has('nome') ? 'is-invalid' : '' }}" placeholder="Nome" value="{{ old('nome') }}" required>
+                        <label for="novaNome">Nome</label>
                         @if($errors->has('nome'))
                             <div class="invalid-feedback">{{ $errors->first('nome') }}</div>
                         @endif
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tipo</label>
-                        <select name="tipo" class="form-select">
+                    <div class="form-floating mb-3">
+                        <select id="novoTipo" name="tipo" class="form-select">
                             <option value="comum_curricular" {{ old('tipo', 'comum_curricular') === 'comum_curricular' ? 'selected' : '' }}>Comum Curricular</option>
                             <option value="eletiva" {{ old('tipo') === 'eletiva' ? 'selected' : '' }}>Eletiva</option>
                         </select>
+                        <label for="novoTipo">Tipo</label>
                     </div>
                     <div class="modal-footer px-0 pb-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>

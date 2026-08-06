@@ -19,30 +19,31 @@ class ProfessorController extends Controller
         return view('grade.professores.index', ['professores' => $professores, 'busca' => $busca]);
     }
 
+    public function criar()
+    {
+        return view('grade.professores.criar');
+    }
+
     public function store(Request $request)
     {
-        $dados = $request->validate([
-            'nome' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'telefone' => 'nullable|string|max:30',
-            'ativo' => 'nullable|boolean',
-        ]);
+        $dados = $this->validarProfessor($request);
 
-        $dados['ativo'] = $request->boolean('ativo', true);
+        $professor = Professor::create($dados);
 
-        Professor::create($dados);
+        return redirect("/grade/professores/{$professor->id}/editar")
+            ->with('sucesso', 'Professor cadastrado! Agora vincule as disciplinas/turmas e marque a disponibilidade dele.');
+    }
 
-        return redirect('/grade/professores')->with('sucesso', 'Professor cadastrado com sucesso!');
+    public function editar(Professor $professor)
+    {
+        $professor->loadCount(['vinculos', 'disponibilidades']);
+
+        return view('grade.professores.editar', ['professor' => $professor]);
     }
 
     public function update(Request $request, Professor $professor)
     {
-        $dados = $request->validate([
-            'nome' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'telefone' => 'nullable|string|max:30',
-        ]);
-
+        $dados = $this->validarProfessor($request, $professor);
         $dados['ativo'] = $request->boolean('ativo');
 
         $professor->update($dados);
@@ -55,5 +56,20 @@ class ProfessorController extends Controller
         $professor->delete();
 
         return redirect('/grade/professores')->with('sucesso', 'Professor excluído com sucesso!');
+    }
+
+    private function validarProfessor(Request $request, ?Professor $professor = null): array
+    {
+        $dados = $request->validate([
+            'nome' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'telefone' => 'nullable|string|max:30',
+        ]);
+
+        if (! $professor) {
+            $dados['ativo'] = $request->boolean('ativo', true);
+        }
+
+        return $dados;
     }
 }

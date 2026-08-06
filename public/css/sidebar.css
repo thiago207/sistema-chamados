@@ -56,13 +56,28 @@ body {
 
 .sidebar-menu {
     list-style: none;
-    padding: var(--space-3) var(--space-2);
+    padding: var(--space-4) var(--space-3);
     margin: 0;
     flex: 1;
 }
 
 .sidebar-menu li {
     margin-bottom: 2px;
+}
+
+.sidebar-section-label {
+    display: block;
+    padding: var(--space-4) var(--space-3) var(--space-2);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.4);
+    white-space: nowrap;
+}
+
+.sidebar.collapsed .sidebar-section-label {
+    display: none;
 }
 
 .sidebar-menu a {
@@ -101,6 +116,27 @@ body {
 .sidebar-footer {
     padding: var(--space-3);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-footer a {
+    padding: 0.7rem var(--space-3);
+    border-radius: var(--radius-sm);
+    color: #c7d3e8;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar-footer a:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.sidebar-footer i {
+    font-size: 1.05rem;
+    min-width: 20px;
+    text-align: center;
+    flex-shrink: 0;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -161,8 +197,8 @@ body {
     gap: var(--space-3);
 }
 
-.topbar-user .fw-bold {
-    color: var(--color-primary-600) !important;
+.topbar-user .fw-semibold {
+    color: var(--color-ink-900);
     font-size: var(--fs-sm);
 }
 

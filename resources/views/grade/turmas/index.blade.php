@@ -19,13 +19,6 @@
     </a>
 </div>
 
-@if(session('sucesso'))
-    <div class="alert alert-success d-flex align-items-center gap-2">
-        <i class="bi bi-check-circle"></i>
-        <span>{{ session('sucesso') }}</span>
-    </div>
-@endif
-
 <div class="card mb-3">
     <div class="card-body">
         <form action="/grade/turmas" method="GET" class="d-flex gap-2">
@@ -98,6 +91,13 @@
                                         <a href="/grade/turmas/{{ $turma->id }}/editar" class="btn btn-sm btn-primary" title="Editar">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+                                        <form action="/grade/turmas/{{ $turma->id }}/duplicar" method="POST"
+                                            data-confirm="Duplicar &quot;{{ $turma->nome }}&quot;? Os dias, turnos e a matriz curricular serão copiados — só o nome precisa ser ajustado depois.">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary" title="Duplicar">
+                                                <i class="bi bi-copy"></i>
+                                            </button>
+                                        </form>
                                         <form action="/grade/turmas/{{ $turma->id }}" method="POST"
                                             data-confirm="Excluir esta série/turma? A matriz curricular, vínculos e horários gerados também serão excluídos." data-confirm-tipo="danger">
                                             @csrf

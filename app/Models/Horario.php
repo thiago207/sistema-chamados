@@ -17,6 +17,11 @@ class Horario extends Model
         'dia_semana',
         'turno',
         'numero_aula',
+        'editado_manualmente',
+    ];
+
+    protected $casts = [
+        'editado_manualmente' => 'boolean',
     ];
 
     public function escola()

@@ -27,9 +27,9 @@
 
 @if($turma->materias->isNotEmpty())
     <div class="card mb-3">
-        <div class="card-header"><strong>Matriz curricular</strong></div>
+        <div class="card-header fw-semibold"><i class="bi bi-journal-bookmark me-2 text-brand"></i>Matriz curricular</div>
         <div class="card-body p-0">
-            <table class="table mb-0">
+            <table class="table table-hover mb-0">
                 <thead>
                     <tr>
                         <th class="ps-4">Disciplina</th>
@@ -53,6 +53,7 @@
     @php $aulas = $turno === 'manha' ? $turma->aulas_manha : $turma->aulas_tarde; @endphp
     @if($aulas > 0)
         <div class="card mb-3">
+            <div class="card-header fw-semibold"><i class="bi bi-{{ $turno === 'manha' ? 'sunrise' : 'sunset' }} me-2 text-brand"></i>{{ $rotulo }}</div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-bordered mb-0 text-center align-middle">

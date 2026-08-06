@@ -70,13 +70,16 @@ Route::middleware('autenticado')->group(function () {
                 Route::get('/{turma}/editar', [TurmaController::class, 'editar']);
                 Route::put('/{turma}', [TurmaController::class, 'update']);
                 Route::delete('/{turma}', [TurmaController::class, 'destroy']);
+                Route::post('/{turma}/duplicar', [TurmaController::class, 'duplicar']);
                 Route::get('/{turma}/materias-json', [VinculoController::class, 'materiasDaTurma']);
                 Route::get('/{turma}', [TurmaController::class, 'show']);
             });
 
             Route::prefix('professores')->group(function () {
                 Route::get('/', [ProfessorController::class, 'index']);
+                Route::get('/criar', [ProfessorController::class, 'criar']);
                 Route::post('/', [ProfessorController::class, 'store']);
+                Route::get('/{professor}/editar', [ProfessorController::class, 'editar']);
                 Route::put('/{professor}', [ProfessorController::class, 'update']);
                 Route::delete('/{professor}', [ProfessorController::class, 'destroy']);
 

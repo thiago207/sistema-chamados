@@ -74,6 +74,41 @@ class TurmaController extends Controller
         return redirect('/grade/turmas')->with('sucesso', 'Série/turma excluída com sucesso!');
     }
 
+
+    public function duplicar(Turma $turma)
+    {
+        $turma->load('materias');
+
+        $nova = DB::transaction(function () use ($turma) {
+            $copia = $turma->replicate();
+            $copia->nome = $this->nomeDuplicadoDisponivel($turma->nome);
+            $copia->save();
+
+            $sync = $turma->materias->mapWithKeys(fn ($materia) => [
+                $materia->id => ['quantidade_aulas' => $materia->pivot->quantidade_aulas],
+            ])->all();
+            $copia->materias()->sync($sync);
+
+            return $copia;
+        });
+
+        return redirect("/grade/turmas/{$nova->id}/editar")
+            ->with('sucesso', "Duplicada a partir de \"{$turma->nome}\". Ajuste o nome e o que for preciso.");
+    }
+
+    private function nomeDuplicadoDisponivel(string $nomeBase): string
+    {
+        $nome = "{$nomeBase} (cópia)";
+        $contador = 2;
+
+        while (Turma::where('nome', $nome)->exists()) {
+            $nome = "{$nomeBase} (cópia {$contador})";
+            $contador++;
+        }
+
+        return $nome;
+    }
+
     private function validarTurma(Request $request, ?Turma $turma = null): array
     {
         $temManha = $request->boolean('tem_manha');
@@ -117,10 +152,7 @@ class TurmaController extends Controller
         return $dados;
     }
 
-    /**
-     * Salva a matriz curricular da série/turma: quais disciplinas ela tem
-     * e quantas aulas semanais cada uma exige.
-     */
+
     private function salvarMaterias(Request $request, Turma $turma): void
     {
         $dados = $request->validate([

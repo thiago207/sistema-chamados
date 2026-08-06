@@ -30,9 +30,10 @@ class GeradorDeGradeService
     private const MAX_BACKTRACKS = 3000;
 
     /**
-     * Gera a grade da escola ativa. Apaga os horários existentes e recria
-     * tudo dentro de uma transação: se algo falhar no meio, a grade antiga
-     * permanece intacta.
+     * Gera a grade da escola ativa. Preserva os horários que o usuário
+     * editou manualmente (tela Editar Horários) e apaga/recria só os que
+     * foram criados pelo próprio gerador — tudo dentro de uma transação:
+     * se algo falhar no meio, a grade antiga permanece intacta.
      *
      * @return array{alocadas: int, total: int, naoAlocadas: array<string>}
      */
@@ -41,11 +42,15 @@ class GeradorDeGradeService
         return DB::transaction(function () {
             $escolaId = session('escola_ativa_id');
 
-            Horario::where('escola_id', $escolaId)->delete();
+            $fixas = Horario::where('escola_id', $escolaId)->where('editado_manualmente', true)->get();
+
+            Horario::where('escola_id', $escolaId)->where('editado_manualmente', false)->delete();
 
             $this->carregarDados();
+            $this->registrarFixas($fixas);
 
-            $fila = $this->montarFilaDeAulas();
+            $fila = $this->montarFilaDeAulas($fixas);
+            $totalCurricular = $fixas->count() + count($fila);
             $fila = $this->ordenarPorRestricao($fila);
 
             [$alocacoes, $naoAlocadas] = $this->alocarComBacktracking($fila);
@@ -63,11 +68,31 @@ class GeradorDeGradeService
             }
 
             return [
-                'alocadas' => count($alocacoes),
-                'total' => count($fila),
+                'alocadas' => $fixas->count() + count($alocacoes),
+                'total' => $totalCurricular,
                 'naoAlocadas' => $naoAlocadas,
             ];
         });
+    }
+
+    /**
+     * Marca os slots dos horários editados manualmente como ocupados, para
+     * o algoritmo nunca tentar realocar por cima deles nem dar a mesma aula
+     * duas vezes pro mesmo par turma+matéria.
+     *
+     * @param  \Illuminate\Support\Collection<int, Horario>  $fixas
+     */
+    private function registrarFixas($fixas): void
+    {
+        foreach ($fixas as $horario) {
+            $slot = "{$horario->dia_semana}_{$horario->turno}_{$horario->numero_aula}";
+
+            $this->ocupacaoTurma[$horario->turma_id][$slot] = true;
+            $this->ocupacaoProfessor[$horario->professor_id][$slot] = true;
+
+            $chave = $horario->turma_id.'_'.$horario->materia_id;
+            $this->slotsPorTurmaMateria[$chave][] = $slot;
+        }
     }
 
     private function carregarDados(): void
@@ -79,9 +104,15 @@ class GeradorDeGradeService
     /**
      * Expande turma_materia em unidades individuais de aula.
      * Ex: 6A + Matemática + 5 aulas → 5 itens {turma, materia, professor}.
+     * Descontando as aulas desse par que já estão fixadas manualmente —
+     * o gerador só precisa preencher o que ainda falta.
+     *
+     * @param  \Illuminate\Support\Collection<int, Horario>  $fixas
      */
-    private function montarFilaDeAulas(): array
+    private function montarFilaDeAulas($fixas): array
     {
+        $fixasPorPar = $fixas->countBy(fn ($h) => $h->turma_id.'_'.$h->materia_id);
+
         $fila = [];
 
         foreach ($this->turmas as $turma) {
@@ -96,7 +127,11 @@ class GeradorDeGradeService
                     continue;
                 }
 
-                for ($i = 0; $i < $materia->pivot->quantidade_aulas; $i++) {
+                $chave = $turma->id.'_'.$materia->id;
+                $jaFixas = $fixasPorPar[$chave] ?? 0;
+                $faltam = max(0, $materia->pivot->quantidade_aulas - $jaFixas);
+
+                for ($i = 0; $i < $faltam; $i++) {
                     $fila[] = [
                         'turma_id' => $turma->id,
                         'materia_id' => $materia->id,

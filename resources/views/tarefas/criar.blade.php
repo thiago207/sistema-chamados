@@ -20,13 +20,6 @@
 <div class="row justify-content-center">
     <div class="col-lg-9">
 
-        @if(session('sucesso'))
-            <div class="alert alert-success d-flex align-items-center gap-2">
-                <i class="bi bi-check-circle"></i>
-                <span>{{ session('sucesso') }}</span>
-            </div>
-        @endif
-
         <div class="card">
             <div class="card-body">
 
@@ -34,23 +27,23 @@
                     @csrf
 
                     {{-- Título --}}
-                    <div class="mb-3">
-                        <label class="form-label">Título</label>
-                        <input type="text" name="titulo"
+                    <div class="form-floating mb-3">
+                        <input type="text" id="campoTitulo" name="titulo"
                                class="form-control {{ $errors->has('titulo') ? 'is-invalid' : '' }}"
                                value="{{ old('titulo') }}"
                                placeholder="Resumo da tarefa">
+                        <label for="campoTitulo">Título</label>
                         @if($errors->has('titulo'))
                             <div class="invalid-feedback">{{ $errors->first('titulo') }}</div>
                         @endif
                     </div>
 
                     {{-- Descrição --}}
-                    <div class="mb-3">
-                        <label class="form-label">Descrição</label>
-                        <textarea name="descricao" rows="4"
+                    <div class="form-floating mb-3">
+                        <textarea name="descricao" id="campoDescricao" rows="4"
                                   class="form-control {{ $errors->has('descricao') ? 'is-invalid' : '' }}"
-                                  placeholder="Detalhe o que precisa ser feito">{{ old('descricao') }}</textarea>
+                                  placeholder="Detalhe o que precisa ser feito" style="height: 110px">{{ old('descricao') }}</textarea>
+                        <label for="campoDescricao">Descrição</label>
                         @if($errors->has('descricao'))
                             <div class="invalid-feedback">{{ $errors->first('descricao') }}</div>
                         @endif
@@ -75,22 +68,22 @@
                     </div>
 
                     {{-- Data a ser feita --}}
-                    <div class="mb-3">
-                        <label class="form-label">Data a ser feita</label>
-                        <input type="date" name="data"
+                    <div class="form-floating mb-3" style="max-width: 260px;">
+                        <input type="date" id="campoData" name="data"
                                class="form-control {{ $errors->has('data') ? 'is-invalid' : '' }}"
-                               value="{{ old('data') }}">
-                        <small class="text-muted">O dia em que essa tarefa deve ser executada. Aparece no calendário do menu.</small>
+                               value="{{ old('data') }}" placeholder="Data">
+                        <label for="campoData">Data a ser feita</label>
                         @if($errors->has('data'))
                             <div class="invalid-feedback d-block">{{ $errors->first('data') }}</div>
                         @endif
                     </div>
+                    <div class="form-text mb-3 mt-n2">O dia em que essa tarefa deve ser executada. Aparece no calendário do menu.</div>
 
                     {{-- Observações --}}
-                    <div class="mb-4">
-                        <label class="form-label">Observações</label>
-                        <textarea name="observacoes" rows="2" class="form-control"
-                                  placeholder="Opcional">{{ old('observacoes') }}</textarea>
+                    <div class="form-floating mb-4">
+                        <textarea name="observacoes" id="campoObservacoes" rows="2" class="form-control"
+                                  placeholder="Opcional" style="height: 80px">{{ old('observacoes') }}</textarea>
+                        <label for="campoObservacoes">Observações <span class="text-muted">(opcional)</span></label>
                     </div>
 
                     <div class="d-flex gap-2 justify-content-end">

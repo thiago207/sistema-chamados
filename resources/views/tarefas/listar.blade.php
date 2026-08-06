@@ -19,14 +19,6 @@
     </a>
 </div>
 
-@if(session('sucesso'))
-    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2">
-        <i class="bi bi-check-circle"></i>
-        <span>{{ session('sucesso') }}</span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-@endif
-
 {{-- FILTROS --}}
 <div class="card filter-card mb-4">
     <div class="card-body">

@@ -19,14 +19,6 @@
     </a>
 </div>
 
-{{-- Mensagem de sucesso --}}
-@if(session('sucesso'))
-    <div class="alert alert-success d-flex align-items-center gap-2">
-        <i class="bi bi-check-circle"></i>
-        <span>{{ session('sucesso') }}</span>
-    </div>
-@endif
-
 @if($usuarios->isEmpty())
     <div class="card">
         <div class="card-body">
@@ -149,56 +141,56 @@
                             @csrf
                             @method('PUT')
 
-                            <div class="mb-3">
-                                <label class="form-label">Nome</label>
-                                <input type="text" name="name" class="form-control" value="{{ $usuario->name }}" required>
+                            <div class="form-floating mb-3">
+                                <input type="text" id="nome{{ $usuario->id }}" name="name" class="form-control" value="{{ $usuario->name }}" placeholder="Nome" required>
+                                <label for="nome{{ $usuario->id }}">Nome</label>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control" value="{{ $usuario->email }}" required>
+                            <div class="form-floating mb-3">
+                                <input type="email" id="email{{ $usuario->id }}" name="email" class="form-control" value="{{ $usuario->email }}" placeholder="Email" required>
+                                <label for="email{{ $usuario->id }}">Email</label>
                             </div>
 
                             {{-- Senha com olhinho --}}
-                            <div class="mb-3">
-                                <label class="form-label">Nova Senha</label>
-                                <div class="input-group">
-                                    <input type="password" name="password"
+                            <div class="input-group mb-3">
+                                <div class="form-floating">
+                                    <input type="password" id="senha{{ $usuario->id }}" name="password"
                                         class="form-control campo-senha"
                                         placeholder="Deixe em branco para não alterar">
-                                    <button type="button" class="btn btn-outline-secondary btn-olho">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
+                                    <label for="senha{{ $usuario->id }}">Nova senha</label>
                                 </div>
+                                <button type="button" class="btn btn-outline-secondary btn-olho">
+                                    <i class="bi bi-eye"></i>
+                                </button>
                             </div>
 
                             {{-- Confirmar senha — escondido por padrão --}}
-                            <div class="mb-3 grupo-confirmar" style="display: none;">
-                                <label class="form-label">Confirmar Nova Senha</label>
-                                <input type="password" name="password_confirmation"
+                            <div class="form-floating mb-3 grupo-confirmar" style="display: none;">
+                                <input type="password" id="confirmarSenha{{ $usuario->id }}" name="password_confirmation"
                                     class="form-control"
                                     placeholder="Repita a nova senha">
+                                <label for="confirmarSenha{{ $usuario->id }}">Confirmar nova senha</label>
                             </div>
 
                             {{-- Papel --}}
-                            <div class="mb-3">
-                                <label class="form-label">Papel</label>
-                                <select name="papel" class="form-select campo-papel">
+                            <div class="form-floating mb-3">
+                                <select id="papel{{ $usuario->id }}" name="papel" class="form-select campo-papel">
                                     <option value="tarefas" {{ $usuario->papel === 'tarefas' ? 'selected' : '' }}>Tarefas</option>
                                     <option value="grade" {{ $usuario->papel === 'grade' ? 'selected' : '' }}>Grade de Horários</option>
                                     <option value="master" {{ $usuario->papel === 'master' ? 'selected' : '' }}>Master (acesso total)</option>
                                 </select>
+                                <label for="papel{{ $usuario->id }}">Papel</label>
                             </div>
 
                             {{-- Escola — só faz sentido pro papel "grade" --}}
-                            <div class="mb-3 grupo-escola" style="display: none;">
-                                <label class="form-label">Escola</label>
-                                <select name="escola_id" class="form-select">
+                            <div class="form-floating mb-3 grupo-escola" style="display: none;">
+                                <select id="escola{{ $usuario->id }}" name="escola_id" class="form-select">
                                     <option value="" disabled {{ !$usuario->escola_id ? 'selected' : '' }}>Selecione...</option>
                                     @foreach($escolas as $escola)
                                         <option value="{{ $escola->id }}" {{ $usuario->escola_id == $escola->id ? 'selected' : '' }}>{{ $escola->nome }}</option>
                                     @endforeach
                                 </select>
+                                <label for="escola{{ $usuario->id }}">Escola</label>
                             </div>
 
                             <div class="modal-footer px-0 pb-0">

@@ -25,10 +25,12 @@
             @include('grade.turmas.partials.formulario', ['turma' => null])
             @include('grade.turmas.partials.materias', ['turma' => null, 'materias' => $materias])
 
-            <button type="submit" class="btn btn-brand fw-bold mt-2">
-                <i class="bi bi-check-lg"></i> Salvar
-            </button>
-            <a href="/grade/turmas" class="btn btn-secondary mt-2">Cancelar</a>
+            <div class="d-flex gap-2 mt-2">
+                <button type="submit" class="btn btn-brand fw-bold">
+                    <i class="bi bi-check-lg"></i> Salvar
+                </button>
+                <a href="/grade/turmas" class="btn btn-secondary">Cancelar</a>
+            </div>
         </form>
     </div>
 </div>

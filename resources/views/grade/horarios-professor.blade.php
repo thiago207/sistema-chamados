@@ -37,7 +37,7 @@
     @foreach(['manha' => ['Manhã', $maxManha], 'tarde' => ['Tarde', $maxTarde]] as $turno => [$rotulo, $max])
         @if($max > 0)
             <div class="card mb-3">
-                <div class="card-header"><strong>{{ $rotulo }}</strong></div>
+                <div class="card-header fw-semibold"><i class="bi bi-{{ $turno === 'manha' ? 'sunrise' : 'sunset' }} me-2 text-brand"></i>{{ $rotulo }}</div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-bordered text-center mb-0 align-middle">
@@ -55,8 +55,11 @@
                                         <td class="text-muted"><small>{{ $numero }}ª</small></td>
                                         @foreach($diasNomes as $dia => $nome)
                                             @php $horario = $grade[$turno][$numero][$dia] ?? null; @endphp
-                                            <td>
+                                            <td class="position-relative">
                                                 @if($horario)
+                                                    @if($horario->editado_manualmente)
+                                                        <i class="bi bi-pin-angle-fill position-absolute top-0 end-0 mt-1 me-1 text-warning" title="Editado manualmente" style="font-size: .7rem;"></i>
+                                                    @endif
                                                     <div class="fw-semibold">{{ $horario->turma->nome }}</div>
                                                     <div><small>{{ $horario->materia->nome }}</small></div>
                                                 @else

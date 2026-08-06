@@ -9,7 +9,7 @@
             <div class="card-body p-4 p-md-5">
 
                 <div class="text-center mb-4">
-                    <img src="{{ asset('img/logo.png') }}" alt="Salesianas" style="width: 140px;" class="mb-3">
+                    <img src="{{ asset('img/logo.png') }}" alt="Salesianas" style="width: 120px;" class="mb-3">
                     <h3 class="fw-bold text-brand mb-1">Bem-vindo de volta</h3>
                     <p class="text-muted mb-0 small">Entre com suas credenciais para continuar</p>
                 </div>
@@ -30,22 +30,25 @@
 
                 <form action="/auth/login" method="POST" class="text-start">
                     @csrf
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
-                            <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <div class="form-floating">
+                            <input type="email" id="campoEmail" name="email" class="form-control" placeholder="seu@email.com" required>
+                            <label for="campoEmail">Email</label>
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label">Senha</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white"><i class="bi bi-lock text-muted"></i></span>
-                            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+
+                    <div class="input-group mb-4">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <div class="form-floating">
+                            <input type="password" id="campoSenha" name="password" class="form-control" placeholder="Senha" required>
+                            <label for="campoSenha">Senha</label>
                         </div>
                     </div>
+
                     <button type="submit" class="btn btn-brand w-100 fw-bold py-2">
-                        Entrar
+                        <i class="bi bi-box-arrow-in-right"></i> Entrar
                     </button>
                 </form>
 

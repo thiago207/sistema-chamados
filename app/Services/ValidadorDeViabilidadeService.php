@@ -11,9 +11,12 @@ class ValidadorDeViabilidadeService
 {
     /**
      * Roda todas as checagens PRÉ-geração e devolve uma lista de problemas.
-     * Cada problema é ['mensagem' => string, 'acao_label' => ?string, 'acao_url' => ?string]
-     * — o label/url apontam pra tela onde o problema se resolve.
-     * Lista vazia significa que a grade pode ser gerada.
+     * Cada problema é:
+     *   ['mensagem', 'tipo' ('erro'|'aviso'), 'acao_label', 'acao_url',
+     *    'turma_id'?, 'turma_nome'?, 'professor_id'?, 'professor_nome'?]
+     * — a mensagem já vem completa (turma/professor/disciplina incluídos,
+     * sem exigir que a tela monte contexto); turma_id/professor_id servem
+     * só pra agrupar/filtrar na tela. Lista vazia = grade pode ser gerada.
      */
     public function validar(): array
     {
@@ -42,21 +45,48 @@ class ValidadorDeViabilidadeService
                 if ($alocadas < $exigidas) {
                     $faltam = $exigidas - $alocadas;
                     $problemas[] = $this->problema(
-                        "{$turma->nome} possui apenas {$alocadas} aula(s) de {$materia->nome}, porém a matriz curricular exige {$exigidas} (faltam {$faltam}).",
+                        "A turma {$turma->nome} tem apenas {$alocadas} aula(s) de {$materia->nome} na grade gerada, mas a matriz curricular exige {$exigidas} (faltam {$faltam}). Gere a grade novamente ou ajuste manualmente em Horários.",
+                        'aviso',
                         'Ajustar horários manualmente',
-                        "/grade/horarios?turma_id={$turma->id}"
-                    ) + ['turma_id' => $turma->id];
+                        "/grade/horarios?turma_id={$turma->id}",
+                        turmaId: $turma->id,
+                        turmaNome: $turma->nome,
+                    );
                 } elseif ($alocadas > $exigidas) {
+                    $excedente = $alocadas - $exigidas;
                     $problemas[] = $this->problema(
-                        "{$turma->nome} possui {$alocadas} aula(s) de {$materia->nome} alocada(s), porém a matriz curricular exige apenas {$exigidas} (excedente).",
+                        "A turma {$turma->nome} tem {$alocadas} aula(s) de {$materia->nome} na grade gerada, mas a matriz curricular exige só {$exigidas} (excedente de {$excedente}). Ajuste manualmente em Horários.",
+                        'aviso',
                         'Ajustar horários manualmente',
-                        "/grade/horarios?turma_id={$turma->id}"
-                    ) + ['turma_id' => $turma->id];
+                        "/grade/horarios?turma_id={$turma->id}",
+                        turmaId: $turma->id,
+                        turmaNome: $turma->nome,
+                    );
                 }
             }
         }
 
         return $problemas;
+    }
+
+    /**
+     * Problemas (pré-geração + cobertura) de UMA turma específica —
+     * usado na tela de edição de horários, filtrado pelo que está
+     * selecionado no momento. Inclui também problemas de professores que
+     * têm vínculo com essa turma (ex: professor sem disponibilidade
+     * suficiente), porque isso afeta diretamente a grade dessa turma
+     * mesmo o problema sendo "do professor".
+     */
+    public function problemasDaTurma(int $turmaId): array
+    {
+        $professorIds = Vinculo::where('turma_id', $turmaId)->pluck('professor_id')->all();
+
+        $todos = [...$this->validar(), ...$this->verificarCobertura()];
+
+        return array_values(array_filter($todos, function ($p) use ($turmaId, $professorIds) {
+            return $p['turma_id'] === $turmaId
+                || ($p['professor_id'] !== null && in_array($p['professor_id'], $professorIds));
+        }));
     }
 
     private function verificarVinculosFaltantesOuDuplicados(): array
@@ -67,21 +97,29 @@ class ValidadorDeViabilidadeService
 
         foreach ($turmas as $turma) {
             foreach ($turma->materias as $materia) {
-                $quantidadeVinculos = Vinculo::where('turma_id', $turma->id)
+                $vinculos = Vinculo::with('professor')
+                    ->where('turma_id', $turma->id)
                     ->where('materia_id', $materia->id)
-                    ->count();
+                    ->get();
 
-                if ($quantidadeVinculos === 0) {
+                if ($vinculos->isEmpty()) {
                     $problemas[] = $this->problema(
-                        "{$turma->nome} — {$materia->nome}: nenhum professor vinculado.",
+                        "A disciplina {$materia->nome} da turma {$turma->nome} ainda não tem professor vinculado — a grade não sabe quem alocar. Vá em Professores e crie o vínculo.",
+                        'erro',
                         'Vincular um professor',
-                        '/grade/professores'
+                        '/grade/professores',
+                        turmaId: $turma->id,
+                        turmaNome: $turma->nome,
                     );
-                } elseif ($quantidadeVinculos > 1) {
+                } elseif ($vinculos->count() > 1) {
+                    $nomes = $vinculos->pluck('professor.nome')->filter()->implode(', ');
                     $problemas[] = $this->problema(
-                        "{$turma->nome} — {$materia->nome}: {$quantidadeVinculos} professores vinculados (só pode haver um).",
+                        "A disciplina {$materia->nome} da turma {$turma->nome} está vinculada a {$vinculos->count()} professores ao mesmo tempo ({$nomes}) — só pode haver um. Remova o vínculo duplicado.",
+                        'erro',
                         'Remover o vínculo duplicado',
-                        '/grade/professores'
+                        '/grade/professores',
+                        turmaId: $turma->id,
+                        turmaNome: $turma->nome,
                     );
                 }
             }
@@ -101,9 +139,12 @@ class ValidadorDeViabilidadeService
             if ($somaAulas > $maximo) {
                 $excedente = $somaAulas - $maximo;
                 $problemas[] = $this->problema(
-                    "{$turma->nome}: matriz curricular soma {$somaAulas} aula(s), mas a série/turma só tem {$maximo} slot(s) semanais ({$excedente} a mais).",
+                    "A turma {$turma->nome} tem {$somaAulas} aula(s) somadas na matriz curricular, mas o turno configurado só comporta {$maximo} aula(s) por semana ({$excedente} a mais). Reduza a carga de alguma disciplina ou aumente os horários da turma.",
+                    'erro',
                     'Editar carga horária ou matriz curricular',
-                    "/grade/turmas/{$turma->id}/editar"
+                    "/grade/turmas/{$turma->id}/editar",
+                    turmaId: $turma->id,
+                    turmaNome: $turma->nome,
                 );
             }
         }
@@ -118,9 +159,12 @@ class ValidadorDeViabilidadeService
         foreach (Turma::with('materias')->get() as $turma) {
             if ($turma->materias->isEmpty()) {
                 $problemas[] = $this->problema(
-                    "{$turma->nome}: nenhuma disciplina cadastrada na matriz curricular.",
+                    "A turma {$turma->nome} ainda não tem nenhuma disciplina cadastrada na matriz curricular.",
+                    'erro',
                     'Cadastrar matriz curricular',
-                    "/grade/turmas/{$turma->id}/editar"
+                    "/grade/turmas/{$turma->id}/editar",
+                    turmaId: $turma->id,
+                    turmaNome: $turma->nome,
                 );
             }
         }
@@ -139,9 +183,12 @@ class ValidadorDeViabilidadeService
             if ($necessarias > $disponiveis) {
                 $faltam = $necessarias - $disponiveis;
                 $problemas[] = $this->problema(
-                    "{$professor->nome}: precisa dar {$necessarias} aula(s) por semana, mas só marcou {$disponiveis} slot(s) disponível(is) (faltam {$faltam}).",
+                    "O professor {$professor->nome} precisa dar {$necessarias} aula(s) por semana (somando todas as turmas em que está vinculado), mas marcou apenas {$disponiveis} horário(s) disponível(is) — faltam {$faltam}. Marque mais disponibilidade pra ele.",
+                    'erro',
                     'Marcar mais disponibilidade',
-                    "/grade/professores/{$professor->id}/disponibilidade"
+                    "/grade/professores/{$professor->id}/disponibilidade",
+                    professorId: $professor->id,
+                    professorNome: $professor->nome,
                 );
             }
         }
@@ -156,9 +203,12 @@ class ValidadorDeViabilidadeService
         foreach (Professor::with(['vinculos', 'disponibilidades'])->get() as $professor) {
             if ($professor->vinculos->isNotEmpty() && $professor->disponibilidades->isEmpty()) {
                 $problemas[] = $this->problema(
-                    "{$professor->nome}: tem vínculos de aula mas não marcou nenhuma disponibilidade.",
+                    "O professor {$professor->nome} está vinculado a disciplinas mas ainda não marcou nenhum horário disponível — sem isso, a grade não consegue alocar as aulas dele.",
+                    'erro',
                     'Marcar disponibilidade',
-                    "/grade/professores/{$professor->id}/disponibilidade"
+                    "/grade/professores/{$professor->id}/disponibilidade",
+                    professorId: $professor->id,
+                    professorNome: $professor->nome,
                 );
             }
         }
@@ -175,12 +225,25 @@ class ValidadorDeViabilidadeService
         });
     }
 
-    private function problema(string $mensagem, ?string $acaoLabel = null, ?string $acaoUrl = null): array
-    {
+    private function problema(
+        string $mensagem,
+        string $tipo,
+        ?string $acaoLabel = null,
+        ?string $acaoUrl = null,
+        ?int $turmaId = null,
+        ?string $turmaNome = null,
+        ?int $professorId = null,
+        ?string $professorNome = null,
+    ): array {
         return [
             'mensagem' => $mensagem,
+            'tipo' => $tipo,
             'acao_label' => $acaoLabel,
             'acao_url' => $acaoUrl,
+            'turma_id' => $turmaId,
+            'turma_nome' => $turmaNome,
+            'professor_id' => $professorId,
+            'professor_nome' => $professorNome,
         ];
     }
 }

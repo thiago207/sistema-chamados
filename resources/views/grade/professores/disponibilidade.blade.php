@@ -17,15 +17,9 @@
     </div>
 </div>
 
-@if(session('sucesso'))
-    <div class="alert alert-success d-flex align-items-center gap-2">
-        <i class="bi bi-check-circle"></i>
-        <span>{{ session('sucesso') }}</span>
-    </div>
-@endif
-
-<div class="alert" id="alertaResumo">
-    Precisa dar <strong>{{ $aulasNecessarias }}</strong> aula(s) por semana · marcou <strong id="totalMarcados">{{ count($slotsMarcados) }}</strong> slot(s) disponível(is)
+<div class="alert alert-secondary d-flex align-items-center gap-2" id="alertaResumo">
+    <i class="bi bi-info-circle"></i>
+    <span>Precisa dar <strong>{{ $aulasNecessarias }}</strong> aula(s) por semana · marcou <strong id="totalMarcados">{{ count($slotsMarcados) }}</strong> slot(s) disponível(is)</span>
 </div>
 
 @php
@@ -37,14 +31,14 @@
     @method('PUT')
 
     <div class="d-flex gap-2 mb-3">
-        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnMarcarTudo">Marcar tudo</button>
-        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnLimparTudo">Limpar tudo</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnMarcarTudo"><i class="bi bi-check-all"></i> Marcar tudo</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnLimparTudo"><i class="bi bi-x-lg"></i> Limpar tudo</button>
     </div>
 
     @foreach(['manha' => ['Manhã', $maxManha], 'tarde' => ['Tarde', $maxTarde]] as $turno => [$rotulo, $max])
         <div class="card mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>{{ $rotulo }}</strong>
+            <div class="card-header d-flex justify-content-between align-items-center fw-semibold">
+                <span><i class="bi bi-{{ $turno === 'manha' ? 'sunrise' : 'sunset' }} me-2 text-brand"></i>{{ $rotulo }}</span>
                 <button type="button" class="btn btn-outline-success btn-sm btn-marcar-turno" data-turno="{{ $turno }}">
                     Marcar {{ $rotulo }} inteira
                 </button>

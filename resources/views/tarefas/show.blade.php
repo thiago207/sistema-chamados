@@ -20,13 +20,6 @@
     </a>
 </div>
 
-@if(session('sucesso'))
-    <div class="alert alert-success d-flex align-items-center gap-2">
-        <i class="bi bi-check-circle"></i>
-        <span>{{ session('sucesso') }}</span>
-    </div>
-@endif
-
 <div class="row justify-content-center">
     <div class="col-lg-9">
 
