@@ -14,6 +14,7 @@ class MenuController extends Controller
 {
     public function index()
     {
+    
         $resumo = [
             'pendentes'  => Tarefa::where('status', 'pendente')->count(),
             'concluidas' => Tarefa::where('status', 'concluida')->count(),

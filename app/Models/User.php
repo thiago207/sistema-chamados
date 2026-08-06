@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'escola_id',
+        'papel',
     ];
 
     /**
@@ -49,5 +51,25 @@ class User extends Authenticatable
     public function tarefas()
     {
         return $this->belongsToMany(Tarefa::class, 'tarefa_user');
+    }
+
+    public function escola()
+    {
+        return $this->belongsTo(Escola::class);
+    }
+
+    public function isMaster(): bool
+    {
+        return $this->papel === 'master';
+    }
+
+    public function isTarefas(): bool
+    {
+        return $this->papel === 'tarefas';
+    }
+
+    public function isGrade(): bool
+    {
+        return $this->papel === 'grade';
     }
 }

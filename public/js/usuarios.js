@@ -1,5 +1,31 @@
 $(document).ready(function () {
 
+    // Mostra/esconde o select de escola conforme o papel escolhido
+    function alternarGrupoEscola(select, animado) {
+        const grupoEscola = $(select).closest('form').find('.grupo-escola');
+        const mostrar = $(select).val() === 'grade';
+
+        if (!animado) {
+            grupoEscola.toggle(mostrar);
+            return;
+        }
+
+        if (mostrar) {
+            grupoEscola.slideDown();
+        } else {
+            grupoEscola.slideUp();
+            grupoEscola.find('select').val('');
+        }
+    }
+
+    $('.campo-papel').each(function () {
+        alternarGrupoEscola(this, false);
+    });
+
+    $(document).on('change', '.campo-papel', function () {
+        alternarGrupoEscola(this, true);
+    });
+
     // Mostra/esconde o campo "confirmar senha" conforme o usuário digita
     $('.campo-senha').on('input', function () {
         // Sobe até o modal-body e busca o grupo confirmar dentro dele

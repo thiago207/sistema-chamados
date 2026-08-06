@@ -8,28 +8,35 @@ use Illuminate\Support\Facades\Hash; // Para hash de senha
 
 
 // Models
+use App\Models\Escola;
 use App\Models\User;
 
 class UsuarioController extends Controller
 {
     public function index()
     {
-        return view('usuarios.cadastrar');
+        $escolas = Escola::orderBy('nome')->get();
+
+        return view('usuarios.cadastrar', ['escolas' => $escolas]);
     }
     public function criarUsuario(Request $request)
     {
         // 1. Valida os dados
-        $request->validate([
-            'name'     => 'required',
-            'email'    => 'required|email|unique:users',
-            'password' => 'required|min:8|confirmed',
+        $dados = $request->validate([
+            'name'      => 'required',
+            'email'     => 'required|email|unique:users',
+            'password'  => 'required|min:8|confirmed',
+            'papel'     => 'required|in:master,tarefas,grade',
+            'escola_id' => 'required_if:papel,grade|nullable|exists:escolas,id',
         ]);
 
         // 2. Cria o usuário no banco
         User::create([
-            'name'     => $request->input('name'),
-            'email'    => $request->input('email'),
-            'password' => Hash::make($request->input('password')),
+            'name'      => $dados['name'],
+            'email'     => $dados['email'],
+            'password'  => Hash::make($dados['password']),
+            'papel'     => $dados['papel'],
+            'escola_id' => $dados['papel'] === 'grade' ? $dados['escola_id'] : null,
         ]);
 
         // 3. Redireciona com sucesso
@@ -38,10 +45,11 @@ class UsuarioController extends Controller
     public function listarUsuarios()
     {
         // 1. Busca todos os usuários
-        $usuarios = User::all();
+        $usuarios = User::with('escola')->get();
+        $escolas = Escola::orderBy('nome')->get();
 
         // 2. Retorna a view com os usuários
-        return view('usuarios.listar', ['usuarios' => $usuarios]);
+        return view('usuarios.listar', ['usuarios' => $usuarios, 'escolas' => $escolas]);
     }
     public function excluir($id)
     {
@@ -58,16 +66,20 @@ class UsuarioController extends Controller
     public function atualizar(Request $request, $id)
     {
         $request->validate([
-            'name'     => 'required',
-            'email'    => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|min:8|confirmed',
+            'name'      => 'required',
+            'email'     => 'required|email|unique:users,email,' . $id,
+            'password'  => 'nullable|min:8|confirmed',
+            'papel'     => 'required|in:master,tarefas,grade',
+            'escola_id' => 'required_if:papel,grade|nullable|exists:escolas,id',
         ]);
 
         $usuario = User::find($id);
 
         $dados = [
-            'name'  => $request->input('name'),
-            'email' => $request->input('email'),
+            'name'      => $request->input('name'),
+            'email'     => $request->input('email'),
+            'papel'     => $request->input('papel'),
+            'escola_id' => $request->input('papel') === 'grade' ? $request->input('escola_id') : null,
         ];
 
         // Só atualiza a senha se o campo foi preenchido

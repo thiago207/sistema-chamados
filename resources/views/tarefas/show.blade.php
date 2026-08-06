@@ -98,7 +98,7 @@
                 <div class="card-footer bg-white border-top">
                     <div class="d-flex flex-column flex-sm-row gap-2">
                         <form action="/tarefas/{{ $tarefa->id }}/concluir" method="POST"
-                              onsubmit="return confirm('Marcar esta tarefa como concluída?')" class="flex-fill">
+                              data-confirm="Marcar esta tarefa como concluída?" class="flex-fill">
                             @csrf
                             @method('PUT')
                             <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">
@@ -107,7 +107,7 @@
                         </form>
 
                         <form action="/tarefas/{{ $tarefa->id }}/cancelar" method="POST"
-                              onsubmit="return confirm('Cancelar esta tarefa?')" class="flex-fill">
+                              data-confirm="Cancelar esta tarefa?" data-confirm-tipo="danger" class="flex-fill">
                             @csrf
                             @method('PUT')
                             <button type="submit" class="btn btn-outline-danger btn-lg w-100 fw-bold">

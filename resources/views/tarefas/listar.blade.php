@@ -128,7 +128,7 @@
 
                         @if($tarefa->status === 'pendente')
                             <form action="/tarefas/{{ $tarefa->id }}/concluir" method="POST"
-                                  onsubmit="return confirm('Marcar esta tarefa como concluída?')" class="flex-fill">
+                                  data-confirm="Marcar esta tarefa como concluída?" class="flex-fill">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" class="btn btn-success w-100" title="Concluir">
@@ -137,7 +137,7 @@
                             </form>
 
                             <form action="/tarefas/{{ $tarefa->id }}/cancelar" method="POST"
-                                  onsubmit="return confirm('Cancelar esta tarefa?')" class="flex-fill">
+                                  data-confirm="Cancelar esta tarefa?" data-confirm-tipo="danger" class="flex-fill">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" class="btn btn-outline-danger w-100" title="Cancelar">
@@ -212,7 +212,7 @@
 
                                         @if($tarefa->status === 'pendente')
                                             <form action="/tarefas/{{ $tarefa->id }}/concluir" method="POST"
-                                                  onsubmit="return confirm('Marcar esta tarefa como concluída?')">
+                                                  data-confirm="Marcar esta tarefa como concluída?">
                                                 @csrf
                                                 @method('PUT')
                                                 <button type="submit" class="btn btn-sm btn-success" title="Concluir">
@@ -221,7 +221,7 @@
                                             </form>
 
                                             <form action="/tarefas/{{ $tarefa->id }}/cancelar" method="POST"
-                                                  onsubmit="return confirm('Cancelar esta tarefa?')">
+                                                  data-confirm="Cancelar esta tarefa?" data-confirm-tipo="danger">
                                                 @csrf
                                                 @method('PUT')
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancelar">

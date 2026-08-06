@@ -46,6 +46,12 @@
                 <div class="card-body">
                     <div class="fw-semibold text-brand mb-1">{{ $usuario->name }}</div>
                     <div class="text-muted small mb-1">{{ $usuario->email }}</div>
+                    <div class="text-muted small mb-1">
+                        {{ ucfirst($usuario->papel) }}
+                        @if($usuario->escola)
+                            · {{ $usuario->escola->nome }}
+                        @endif
+                    </div>
                     <div class="text-muted small mb-3">Cadastrado em {{ $usuario->created_at->format('d/m/Y') }}</div>
 
                     <div class="d-flex gap-2">
@@ -58,7 +64,7 @@
                         </button>
 
                         <form action="/usuarios/{{ $usuario->id }}/excluir" method="POST"
-                            onsubmit="return confirm('Tem certeza que deseja excluir?')" class="flex-fill">
+                            data-confirm="Tem certeza que deseja excluir?" data-confirm-tipo="danger" class="flex-fill">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger w-100" title="Excluir">
@@ -81,6 +87,7 @@
                             <th class="ps-4">#</th>
                             <th>Nome</th>
                             <th>Email</th>
+                            <th>Papel</th>
                             <th>Cadastrado em</th>
                             <th class="text-end pe-4">Ações</th>
                         </tr>
@@ -91,6 +98,14 @@
                                 <td class="ps-4 text-muted">{{ $usuario->id }}</td>
                                 <td class="fw-semibold text-brand">{{ $usuario->name }}</td>
                                 <td>{{ $usuario->email }}</td>
+                                <td>
+                                    <small>
+                                        {{ ucfirst($usuario->papel) }}
+                                        @if($usuario->escola)
+                                            · {{ $usuario->escola->nome }}
+                                        @endif
+                                    </small>
+                                </td>
                                 <td><small>{{ $usuario->created_at->format('d/m/Y') }}</small></td>
                                 <td class="pe-4">
                                     <div class="d-flex gap-2 justify-content-end">
@@ -103,7 +118,7 @@
                                         </button>
 
                                         <form action="/usuarios/{{ $usuario->id }}/excluir" method="POST"
-                                            onsubmit="return confirm('Tem certeza que deseja excluir?')">
+                                            data-confirm="Tem certeza que deseja excluir?" data-confirm-tipo="danger">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger" title="Excluir">
@@ -163,6 +178,27 @@
                                 <input type="password" name="password_confirmation"
                                     class="form-control"
                                     placeholder="Repita a nova senha">
+                            </div>
+
+                            {{-- Papel --}}
+                            <div class="mb-3">
+                                <label class="form-label">Papel</label>
+                                <select name="papel" class="form-select campo-papel">
+                                    <option value="tarefas" {{ $usuario->papel === 'tarefas' ? 'selected' : '' }}>Tarefas</option>
+                                    <option value="grade" {{ $usuario->papel === 'grade' ? 'selected' : '' }}>Grade de Horários</option>
+                                    <option value="master" {{ $usuario->papel === 'master' ? 'selected' : '' }}>Master (acesso total)</option>
+                                </select>
+                            </div>
+
+                            {{-- Escola — só faz sentido pro papel "grade" --}}
+                            <div class="mb-3 grupo-escola" style="display: none;">
+                                <label class="form-label">Escola</label>
+                                <select name="escola_id" class="form-select">
+                                    <option value="" disabled {{ !$usuario->escola_id ? 'selected' : '' }}>Selecione...</option>
+                                    @foreach($escolas as $escola)
+                                        <option value="{{ $escola->id }}" {{ $usuario->escola_id == $escola->id ? 'selected' : '' }}>{{ $escola->nome }}</option>
+                                    @endforeach
+                                </select>
                             </div>
 
                             <div class="modal-footer px-0 pb-0">

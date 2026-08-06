@@ -6,7 +6,7 @@
 
 <div class="page-header">
     <div>
-        <h1 class="page-header__title">Bem-vindo, {{ session('usuario_nome') }}</h1>
+        <h1 class="page-header__title">Bem-vindooo, {{ session('usuario_nome') }}</h1>
         <p class="page-header__subtitle mb-0">Atividades do mês</p>
     </div>
     <div class="d-flex gap-2">

@@ -79,7 +79,7 @@
                     </div>
 
                     {{-- Confirmar Senha --}}
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label class="form-label">Confirmar Senha</label>
                         <input
                             type="password"
@@ -87,6 +87,33 @@
                             class="form-control"
                             placeholder="Repita a senha"
                         >
+                    </div>
+
+                    {{-- Papel --}}
+                    <div class="mb-3">
+                        <label class="form-label">Papel</label>
+                        <select name="papel" class="form-select campo-papel {{ $errors->has('papel') ? 'is-invalid' : '' }}">
+                            <option value="tarefas" {{ old('papel') === 'tarefas' ? 'selected' : '' }}>Tarefas</option>
+                            <option value="grade" {{ old('papel') === 'grade' ? 'selected' : '' }}>Grade de Horários</option>
+                            <option value="master" {{ old('papel') === 'master' ? 'selected' : '' }}>Master (acesso total)</option>
+                        </select>
+                        @if($errors->has('papel'))
+                            <div class="invalid-feedback">{{ $errors->first('papel') }}</div>
+                        @endif
+                    </div>
+
+                    {{-- Escola — só faz sentido pro papel "grade" --}}
+                    <div class="mb-4 grupo-escola" style="display: none;">
+                        <label class="form-label">Escola</label>
+                        <select name="escola_id" class="form-select {{ $errors->has('escola_id') ? 'is-invalid' : '' }}">
+                            <option value="" selected disabled>Selecione...</option>
+                            @foreach($escolas as $escola)
+                                <option value="{{ $escola->id }}" {{ old('escola_id') == $escola->id ? 'selected' : '' }}>{{ $escola->nome }}</option>
+                            @endforeach
+                        </select>
+                        @if($errors->has('escola_id'))
+                            <div class="invalid-feedback">{{ $errors->first('escola_id') }}</div>
+                        @endif
                     </div>
 
                     <button type="submit" class="btn btn-brand w-100 fw-bold">
